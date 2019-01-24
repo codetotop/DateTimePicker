@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
   @BindView(R.id.imgDateTimePicker)
   ImageView imgDateTimePicker;
   Unbinder mBinder;
-  Calendar calendar = Calendar.getInstance();
+  Calendar mCalendar = Calendar.getInstance();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +45,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
   }
 
   private void addControls() {
-    tvDate.setText(getStringDateCurrent());
-    tvTime.setText(getStringTimeCurrent());
-    tvDateTime.setText(getStringDateCurrent() + " " + getStringTimeCurrent());
+    tvDate.setText(DateTimeUtil.getStringDate(mCalendar));
+    tvTime.setText(DateTimeUtil.getStringTime(mCalendar));
+    tvDateTime.setText(DateTimeUtil.getStringDate(mCalendar) + " " + DateTimeUtil.getStringTime(mCalendar));
   }
 
   private void addEvent() {
@@ -56,24 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     imgDateTimePicker.setOnClickListener(this);
   }
 
-  public String getStringDateCurrent() {
-    String date_current = "";
-    int year = calendar.get(Calendar.YEAR);
-    int month = calendar.get(Calendar.MONTH) + 1;
-    int day = calendar.get(Calendar.DAY_OF_MONTH);
-    date_current = day + "-" + month + "-" + year;
-    return date_current;
-  }
 
-  public String getStringTimeCurrent() {
-    String time_current = "";
-    int hour = calendar.get(Calendar.HOUR_OF_DAY);
-    int minute = calendar.get(Calendar.MINUTE);
-    int second = calendar.get(Calendar.SECOND);
-
-    time_current = hour + ":" + minute + ":" + second;
-    return time_current;
-  }
 
   @Override
   protected void onDestroy() {
@@ -98,15 +81,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
   }
 
   private void showDatePicker() {
-    Calendar calendar = DateTimeUtil.calendarSetTime(tvDate.getText() + " " + tvTime.getText());
+    final Calendar calendar = DateTimeUtil.calendarSetTime(tvDate.getText() + " " + tvTime.getText());
     int day = calendar.get(Calendar.DAY_OF_MONTH);
     int month = calendar.get(Calendar.MONTH);
     int year = calendar.get(Calendar.YEAR);
     DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
       @Override
       public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-        String date = day + "-" + (month + 1) + "-" + year;
-        tvDate.setText(date);
+        calendar.set(year, month, day);
+        tvDate.setText(DateTimeUtil.getStringDate(calendar));
       }
     }, year, month, day);
 
@@ -114,15 +97,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
   }
 
   private void showTimePicker() {
-    Calendar calendar = DateTimeUtil.calendarSetTime(tvDate.getText() + " " + tvTime.getText());
+    final Calendar calendar = DateTimeUtil.calendarSetTime(tvDate.getText() + " " + tvTime.getText());
     int hour = calendar.get(Calendar.HOUR_OF_DAY);
     int minute = calendar.get(Calendar.MINUTE);
     final int second = calendar.get(Calendar.SECOND);
     TimePickerDialog timePickerDialog = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
       @Override
       public void onTimeSet(TimePicker timePicker, int i, int i1) {
-        String time = i + ":" + i1 + ":" + second;
-        tvTime.setText(time);
+        calendar.set(Calendar.MINUTE, i1);
+        calendar.set(Calendar.HOUR_OF_DAY, i);
+        tvTime.setText(DateTimeUtil.getStringTime(calendar));
       }
     }, hour, minute, true);
 
@@ -130,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
   }
 
   private void showDateAndTimePicker() {
-    Calendar calendar = DateTimeUtil.calendarSetTime(tvDateTime.getText().toString());
+    final Calendar calendar = DateTimeUtil.calendarSetTime(tvDateTime.getText().toString());
     int day = calendar.get(Calendar.DAY_OF_MONTH);
     int month = calendar.get(Calendar.MONTH);
     int year = calendar.get(Calendar.YEAR);
@@ -143,7 +127,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TimePickerDialog timePickerDialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
           @Override
           public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-            tvDateTime.setText(day + "-" + month + "-" + year + " " + hour + ":" + minute + ":" + second);
+            calendar.set(year, month, day, hour, minute, second);
+            tvDateTime.setText(DateTimeUtil.getStringDate(calendar) + " " + DateTimeUtil.getStringTime(calendar));
           }
         }, hour, minute, true);
         timePickerDialog.show();
